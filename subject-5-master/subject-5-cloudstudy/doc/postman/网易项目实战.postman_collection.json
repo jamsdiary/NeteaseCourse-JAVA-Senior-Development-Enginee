@@ -1,0 +1,381 @@
+{
+	"info": {
+		"_postman_id": "371ddaab-7a2e-bc53-ca3b-632611cb4427",
+		"name": "网易项目实战",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "es",
+			"item": [
+				{
+					"name": "新增",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"111\",\r\n  \"name\": \"allen老师测试课程\",\r\n  \"image\": \"http://www.study.163.com\",\r\n  \"price\": 998.0,\r\n  \"synopsis\": \"\",\r\n  \"classification\": \"\",\r\n  \"teacherId\": \"\",\r\n  \"status\": 1,\r\n  \"endTime\": \"2019-08-15 19:18:07\",\r\n  \"startTime\": \"2019-07-15 19:18:07\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "根据id查询",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/get/111",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"get",
+								"111"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取全部",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/get_all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"get_all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "根据id删除",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/delete/111",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"delete",
+								"111"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "清空记录",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/delete_all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"delete_all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "搜索",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": \"111\",\r\n  \"name\": \"allen老师测试课程\",\r\n  \"image\": \"http://www.study.163.com\",\r\n  \"price\": 998.0,\r\n  \"synopsis\": \"\",\r\n  \"classification\": \"\",\r\n  \"teacherId\": \"\",\r\n  \"status\": 1,\r\n  \"endTime\": \"2019-08-15 19:18:07\",\r\n  \"startTime\": \"2019-07-15 19:18:07\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/query/测试",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"query",
+								"测试"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "高亮搜索",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/query_hit?keyword=测试",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"query_hit"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "测试"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "删除索引",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8085/cloud/classroom/es/course/delete_index/course",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"cloud",
+								"classroom",
+								"es",
+								"course",
+								"delete_index",
+								"course"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "优惠券",
+			"item": [
+				{
+					"name": "新增优惠券",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6IjEiLCJuYW1lIjoiQW5keSIsImV4cCI6MTU2NDE2NTY3NX0.VaX3R3_plk5cb1ha0DAkPQN2F9F3XHEPG8JglFycAtLNm-Dv801xeZWVy6gEDFvH_tGDCsCLyqTLAWs0pAIjvvkQleNfyZ7euPJ0Itj63L_7hpfFuBXkJI_5TgVHkeBCgFIzlgpls2HQdGDAezMJ7IhFo912avSowyR4r7Jl2nc"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"couponContent\": \"{\\\"price\\\": -500}\",\r\n  \"couponId\": \"\",\r\n  \"couponSum\": 10,\r\n  \"couponType\": \"1\",\r\n  \"endTime\": \"2019-08-26 19:18:07\",\r\n  \"startTime\": \"2019-07-26 19:18:07\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8765/cloud-coupon-server/coupon/op/addCoupon",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8765",
+							"path": [
+								"cloud-coupon-server",
+								"coupon",
+								"op",
+								"addCoupon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "领取优惠券",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6IjEiLCJuYW1lIjoiQW5keSIsImV4cCI6MTU2NDE2NTY3NX0.VaX3R3_plk5cb1ha0DAkPQN2F9F3XHEPG8JglFycAtLNm-Dv801xeZWVy6gEDFvH_tGDCsCLyqTLAWs0pAIjvvkQleNfyZ7euPJ0Itj63L_7hpfFuBXkJI_5TgVHkeBCgFIzlgpls2HQdGDAezMJ7IhFo912avSowyR4r7Jl2nc"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "couponId",
+									"value": "31421bd5-5047-4c90-a8de-2eac712b51ea",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8765/cloud-coupon-server/coupon/op/acquire",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8765",
+							"path": [
+								"cloud-coupon-server",
+								"coupon",
+								"op",
+								"acquire"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "释放优惠锁定",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6IjEiLCJuYW1lIjoiQW5keSIsImV4cCI6MTU2Mzk3MTEwOX0.jYQQufuS9hJN9LYCDhGS87Any_tF7kiqx6ekH5Rt3sNb0Lbe-7CiW93FfZlwwZF_suzanjFOkIKA4DLTehMl-BbdOfGmeKkr5bAP63AHa3q8ZD3TbSqoc3SpekW3PItnFJiXVkOZI71jX1ygQTfeQ0fxWLZDg_5H3gP_J3KA7nU"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8765/cloud-coupon-server/coupon/op/releaseCoupon",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8765",
+							"path": [
+								"cloud-coupon-server",
+								"coupon",
+								"op",
+								"releaseCoupon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取用户个人可使用的优惠券",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInVzZXJJZCI6IjEiLCJuYW1lIjoiQW5keSIsImV4cCI6MTU2NDE2NTY3NX0.VaX3R3_plk5cb1ha0DAkPQN2F9F3XHEPG8JglFycAtLNm-Dv801xeZWVy6gEDFvH_tGDCsCLyqTLAWs0pAIjvvkQleNfyZ7euPJ0Itj63L_7hpfFuBXkJI_5TgVHkeBCgFIzlgpls2HQdGDAezMJ7IhFo912avSowyR4r7Jl2nc"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8765/cloud-coupon-server/coupon/detail/op/getCouponDetail",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8765",
+							"path": [
+								"cloud-coupon-server",
+								"coupon",
+								"detail",
+								"op",
+								"getCouponDetail"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,392 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<!-- START SNIPPET: example -->
+<beans
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- Allows us to use system properties as variables in this configuration file 连接到ActiveMQ的用户认证-->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <value>file:${activemq.conf}/credentials.properties</value>
+        </property>
+    </bean>
+
+    <!-- Allows accessing the server log -->
+    <bean id="logQuery" class="io.fabric8.insight.log.log4j.Log4jLogQuery"
+          lazy-init="false" scope="singleton"
+          init-method="start" destroy-method="stop">
+    </bean>
+
+    <!--
+        The <broker> element is used to configure the ActiveMQ broker.
+        broker节点:
+    参数名:类型 - 默认值 - 说明
+    brokerName:Str - localhost - 机器名网络内唯一
+    persistent:Boolean - true - 是否持久化
+           true表示需要持久化,需要与元素persistenceAdapter结合使用
+           false表示不持久化 重启后消息丢失 且十分消耗内存
+    dataDirectory:Str|默认持久化数据的目录
+    deleteAllMessagesOnStartup:Boolean|false|启动时是否清空持久化的消息
+    enableStatistics:Boolean|true|是否启用数据收集
+    schedulerSupport： false - 是否启用延时消息
+    -->
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}">
+        <!--
+        目的地策略
+        policyEntry节点:
+            topic:匹配的主题，自定义，可以使用wildcards(http://activemq.apache.org/wildcards.html)
+            producerFlowControl:是否对producer进行控制,如果你对自己ActiveMQ服务端的底层性能和消费者端的性能足够自信的话，可以设置
+                                为false,如果不是那么自信，请将其设为true，同时设置memoryLimit来限制队列使用内存的大小
+            memoryLimit:队列可使用内存上限
+
+        -->
+        <destinationPolicy>
+            <policyMap>
+                <policyEntries>
+                    <policyEntry topic=">">
+                        <!--
+                          消息限制策略，面向Slow Consumer的
+                          此策略只对Topic有效，只对nondurable订阅者有效，当通道中有大量的消息积压时，broker可以保留的消息量。
+                          为了防止Topic中有慢速消费者，导致整个通道消息积压。(对于Topic而言，一条消息只有所有的订阅者都消费才
+                          会被删除)
+                          http://activemq.apache.org/slow-consumer-handling.html
+                        -->
+                        <pendingMessageLimitStrategy>
+                            <!--
+                              ConstantPendingMessageLimitStrategy: 保留固定条数的消息，如果消息量超过limit，将使用
+                              “MessageEvictionStrategy”移除消息
+                              PrefetchRatePendingMessageLimitStrategy: 保留prefetchSize倍数条消息。
+                          -->
+                            <!-- 如果prefetchSize为100，则保留10 * 100条消息 -->
+                            <constantPendingMessageLimitStrategy limit="1000"/>
+                        </pendingMessageLimitStrategy>
+                        <messageEvictionStrategy>
+                            <!--
+                                OldestMessageEvictionStrategy: 移除旧消息，默认策略。
+                                OldestMessageWithLowestPriorityEvictionStrategy: 旧数据中权重较低的消息，将会被移除。
+                                UniquePropertyMessageEvictionStrategy: 移除具有指定property的旧消息。开发者可以指定property的名称
+                                ，从此属性值相同的消息列表中移除较旧的（根据消息的创建时间）。
+                            -->
+                            <oldestMessageWithLowestPriorityEvictionStrategy></oldestMessageWithLowestPriorityEvictionStrategy>
+                        </messageEvictionStrategy>
+                        <!--
+                    慢速消费者策略
+                    Broker将如何处理慢消费者。Broker将会启动一个后台线程用来检测所有的慢速消费者，并定期关闭关闭它们。
+                  -->
+                        <slowConsumerStrategy>
+                            <!--
+                                AbortSlowConsumerStrategy: 中断慢速消费者，慢速消费将会被关闭。abortConnection是否关闭连接
+                                AbortSlowConsumerStrategy: 如果慢速消费者最后一个ACK距离现在的时间间隔超过阀maxTimeSinceLastAck，
+                                则中断慢速消费者。
+                            -->
+                            <abortSlowConsumerStrategy abortConnection="false"/><!-- 不关闭底层链接 -->
+                        </slowConsumerStrategy>
+                        <!--转发策略 将消息转发给消费者的方式-->
+                        <dispatchPolicy>
+                            <!--
+                             RoundRobinDispatchPolicy: “轮询”，消息将依次发送给每个“订阅者”。“订阅者”列表默认按照订阅的先后
+                                                        顺序排列，在转发消息时，对于匹配消息的第一个订阅者，将会被移动到“订阅者
+                                                        ”列表的尾部，这也意味着“下一条”消息，将会较晚的转发给它。
+                             StrictOrderDispatchPolicy: 严格有序，消息依次发送给每个订阅者，按照“订阅者”订阅的时间先后。它和
+                                                        RoundRobin最大的区别是，没有移动“订阅者”顺序的操作。
+                             PriorityDispatchPolicy: 基于“property”权重对“订阅者”排序。它要求开发者首先需要对每个订阅者指定
+                                                      priority，默认每个consumer的权重都一样。
+                             SimpleDispatchPolicy: 默认值，按照当前“订阅者”列表的顺序。其中PriorityDispatchPolicy是其子类。
+                            -->
+                            <strictOrderDispatchPolicy/>
+                        </dispatchPolicy>
+                        <!--恢复策略 ActiveMQ重启如何恢复数据-->
+                        <subscriptionRecoveryPolicy>
+                            <!--
+                                FixedSizedSubscriptionRecoveryPolicy: 保存一定size的消息，broker将为此Topic开辟定额的RAM用来保存
+                                                                      最新的消息。使用maximumSize属性指定保存的size数量
+                                FixedCountSubscriptionRecoveryPolicy: 保存一定条数的消息。 使用maximumSize属性指定保存的size数量
+                                LastImageSubscriptionRecoveryPolicy: 只保留最新的一条数据
+                                QueryBasedSubscriptionRecoveryPolicy: 符合置顶selector的消息都将被保存，具体能够“恢复”多少消息
+                                                                        ，由底层存储机制决定；比如对于非持久化消息，只要内存中还
+                                                                        存在，则都可以恢复。
+                                TimedSubscriptionRecoveryPolicy: 保留最近一段时间的消息。使用recoverDuration属性指定保存时间 单位
+                                                                 毫秒
+                                NoSubscriptionRecoveryPolicy: 关闭“恢复机制”。默认值。
+                            -->
+                            <!--恢复最近30分钟内的信息-->
+                            <timedSubscriptionRecoveryPolicy recoverDuration="1800000"/>
+                        </subscriptionRecoveryPolicy>
+                        <!--"死信"策略 如何处理过去消息
+                        缺省死信队列(Dead Letter Queue)叫做ActiveMQ.DLQ;所有的未送达消息都会被发送到这个队列，以致会非常
+                        难于管理。 默认情况下，无论是Topic还是Queue，broker将使用Queue来保存DeadLeader，即死信通道通常为
+                        Queue；不过开发者也可以指定为Topic。
+                  -->
+                        <deadLetterStrategy>
+                            <!--
+                             IndividualDeadLetterStrategy: 把DeadLetter放入各自的死信通道中,queuePrefix自定义死信前缀
+                             ，useQueueForQueueMessages使用队列保存死信，还有一个属性为“useQueueForTopicMessages”，此值表示是否
+                             将Topic的DeadLetter保存在Queue中，默认为true。
+                             <individualDeadLetterStrategy  queuePrefix="DLQ." useQueueForQueueMessages="true"/>
+
+                             SharedDeadLetterStrategy: 将所有的DeadLetter保存在一个共享的队列中，这是ActiveMQ broker端默认的策略
+                             。共享队列默认为“ActiveMQ.DLQ”，可以通过“deadLetterQueue”属性来设定。还有2个很重要的可选参数
+                             ，“processExpired”表示是否将过期消息放入死信队列，默认为true；“processNonPersistent”表示是否将“
+                             非持久化”消息放入死信队列，默认为false。
+                             <sharedDeadLetterStrategy deadLetterQueue="DLQ-QUEUE"/>
+
+                             DiscardingDeadLetterStrategy: broker将直接抛弃DeadLeatter。如果开发者不需要关心DeadLetter，可以使用
+                             此策略。AcitveMQ提供了一个便捷的插件：DiscardingDLQBrokerPlugin，来抛弃DeadLetter。
+                             下面这个必须配置plugins节点中才对，
+                             丢弃所有死信
+                             <discardingDLQBrokerPlugin dropAll="true" dropTemporaryTopics="true" dropTemporaryQueues="true" />
+                             丢弃指定死信
+                             <discardingDLQBrokerPlugin dropOnly="MY.EXAMPLE.TOPIC.29 MY.EXAMPLE.QUEUE.87" reportInterval="1000"
+                             />
+                             使用丢弃正则匹配到死信
+                             <discardingDLQBrokerPlugin dropOnly="MY.EXAMPLE.TOPIC.[0-9]{3} MY.EXAMPLE.QUEUE.[0-9]{3}"
+                             reportInterval="3000" />
+                            -->
+                            <individualDeadLetterStrategy queuePrefix="DLQ.TOPIC." useQueueForQueueMessages="true"/>
+                        </deadLetterStrategy>
+
+                        <!--非耐久待处理消息处理策略 类似于:pendingQueuePolicy(在下面自己找找)-->
+                        <pendingSubscriberPolicy>
+                            <!--支持三种策略：storeCursor, vmCursor和fileCursor。-->
+                            <fileCursor/>
+                        </pendingSubscriberPolicy>
+                        <!--耐久待处理消息处理策略 类似于:pendingQueuePolicy(在下面自己找找)-->
+                        <pendingDurableSubscriberPolicy>
+                            <!--支持三种策略：storeDurableSubscriberCursor, vmDurableCursor和 fileDurableSubscriberCursor。-->
+                            <storeDurableSubscriberCursor/>
+                        </pendingDurableSubscriberPolicy>
+                    </policyEntry>
+                    <!--消息队列-->
+                    <policyEntry queue=">" producerFlowControl="true" optimizedDispatch="true" memoryLimit="16mb">
+                        <pendingMessageLimitStrategy>
+                            <prefetchRatePendingMessageLimitStrategy multiplier="10"/>
+                        </pendingMessageLimitStrategy>
+                        <messageEvictionStrategy>
+                        </messageEvictionStrategy>
+                        <slowConsumerStrategy>
+                            <abortSlowConsumerStrategy abortConnection="false"/>
+                        </slowConsumerStrategy>
+                        <dispatchPolicy>
+                            <strictOrderDispatchPolicy/>
+                        </dispatchPolicy>
+                        <subscriptionRecoveryPolicy>
+                            <timedSubscriptionRecoveryPolicy recoverDuration="1800000"/>
+                        </subscriptionRecoveryPolicy>
+                        <deadLetterStrategy>
+                            <individualDeadLetterStrategy queuePrefix="DLQ.QUEUE." useQueueForQueueMessages="true"/>
+                        </deadLetterStrategy>
+                        <!--
+                             pendingQueuePolicy 待消费消息策略
+                             通道中有大量Slow Consumer时，Broker该如何优化消息的转发，以及在此情况下，“非持久化”消息达到内存
+                             限制时该如何处理。
+
+                             当Broker接受到消息后，通常将最新的消息写入内存以提高消息转发的效率，提高消息ACK的效率，减少对对底
+                             层Store的操作；如果Consumer非常快速，那么消息将会立即转发给Consumer，不需要额外的操作；但当遇到
+                             Slow Consumer时，情况似乎并没有那么美好。
+
+                             持久化消息，通常为：写入Store->线程轮询，从Store中pageIn数据到PendingStorage->转发给Consumer->从
+                             PendingStorage中移除->消息ACK后从Store中移除。
+
+                             对于非持久化数据，通常为：写入内存->如果内存足够，则PendingStorage直接以内存中的消息转发->如果内
+                             存不足，则将内存中的消息swap到临时文件中->从临时文件中pageIn到内存，转发给Consumer。
+
+                             AcitveMQ提供了几个的Cursor机制，它就是用来保存Pending Messages。
+
+                             1) vmQueueCursor: 将待转发消息保存在额外的内存(JVM linkeList)的存储结构中。是“非持久化消息”的默
+                             认设置，如果Broker不支持Persistent，它是任何类型消息的默认设置。有OOM风险。
+                             2) fileQueueCursor: 将消息保存到临时文件中。文件存储方式有broker的tempDataStore属性决定。是“持久
+                             化消息”的默认设置。
+                             3) storeCursor: “综合”设置，对于非持久化消息，将采用vmQueueCursor存储，对于持久化消息采用
+                             fileQueueCursor。这是强烈推荐的策略，也是效率最好的策略。
+                         -->
+                        <pendingQueuePolicy>
+                        </pendingQueuePolicy>
+                    </policyEntry>
+                </policyEntries>
+            </policyMap>
+        </destinationPolicy>
+
+
+        <!--
+            The managementContext is used to configure how ActiveMQ is exposed in
+            JMX. By default, ActiveMQ uses the MBean server that is started by
+            the JVM. For more information, see:
+
+            http://activemq.apache.org/jmx.html
+        -->
+        <!--
+            ActiveMQ的特性之一是很好的支持JMX。通过JMX MBeans可以很方便的监听和控制ActiveMQ的broker。
+　　        官方网站提供的JMX特性说明对于远程访问的配置流程坑爹，如果想使用jconsole对ActiveMQ进行监控，
+            无密码访问>
+            需要在borker节点设置useJmx属性为true，且managementContext节点的createConnector属性为true。
+            通过jconsole访问地址service:jmx:rmi:///jndi/rmi://ip:1099/jmxrmi进行连接，
+            默认端口为1099，可以通过connectorPort属性修改连接端口，远程访问需要设置connectorHost属性
+            为本机ip以供远程访问
+            有密码访问>
+            需要在borker节点设置useJmx属性为true，且managementContext节点的createConnector属性为false。
+            然后在${actviemq.base}/conf目录下的jmx.access和jmx.password中添加用户权限和密码，
+            最后修改${activemq.base}/bin/activemq文件，找到下面的内容然后去掉注释，保存退出，重启activemq即可
+            # ACTIVEMQ_SUNJMX_START="-Dcom.sun.management.jmxremote.port=11099"
+            # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START-Dcom.sun.management.jmxremote.password.file=${ACTIVEMQ_CONF}/
+                                    jmx.password"
+            # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START-Dcom.sun.management.jmxremote.access.file=${ACTIVEMQ_CONF}/
+                                    jmx.access"
+            # ACTIVEMQ_SUNJMX_START="$ACTIVEMQ_SUNJMX_START -Dcom.sun.management.jmxremote.ssl=false"
+
+        -->
+        <managementContext>
+            <managementContext createConnector="false"/>
+        </managementContext>
+
+        <!--
+            Configure b1_message persistence for the broker. The default persistence
+            mechanism is the KahaDB store (identified by the kahaDB tag).
+            For more information, see:
+
+            http://activemq.apache.org/persistence.html
+        -->
+        <!--持久化存储-->
+        <persistenceAdapter>
+            <!--
+                官方默认的持久化方案
+               Kaha Persistence 是一个专门针对消息持久化的解决方案。它对典型的消息使用模式进行了优化。在 Kaha 中，数据被
+                追加到 data logs 中。当不再需要 log文件中的数据的时候，log 文件会被丢弃。-->
+            <kahaDB directory="${activemq.data}/kahadb"/>
+            <!--
+                支持的数据库有Apache Derby,Axion,DB2,HSQL,Informix,MaxDB,MySQL,Oracle,Postgresql,SQLServer,Sybase。
+                如果你使用的数据库不被支持，那么可以调整 StatementProvider 来保证使
+                用正确的 SQL 方言（flavour of SQL）。通常绝大多数数据库支持以下 adaptor：
+                   1、org.activemq.store.jdbc.adapter.BlobJDBCAdapter
+                   2、org.activemq.store.jdbc.adapter.BytesJDBCAdapter
+                   3、org.activemq.store.jdbc.adapter.DefaultJDBCAdapter
+                   4、org.activemq.store.jdbc.adapter.ImageJDBCAdapter
+                也可以在配置文件中直接指定 JDBC adaptor
+                <jdbcPersistence dataSourceRef=" mysql-ds"/> 参考下面的的“jdbc持久化配置”
+           -->
+        </persistenceAdapter>
+        <!-- jdbc持久化配置
+                <bean id="mysql-ds" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+                    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+                    <property name="url" value="jdbc:mysql://localhost/activemq?relaxAutoCommit=true"/>
+                    <property name="username" value="activemq"/>
+                    <property name="password" value="activemq"/>
+                    <property name="poolPreparedStatements" value="true"/>
+                </bean>
+
+                  The systemUsage controls the maximum amount of space the broker will
+                  use before disabling caching and/or slowing down producers. For more information, see:
+                  http://activemq.apache.org/producer-flow-control.html
+                -->
+
+        <!--
+            系统内存和磁盘空间使用量
+            broker一直没有可使用空间将有可能导致消息生产者的send()方法无限阻塞
+            一种替代方式是使用下面的配置，这时send()方法将会失败并抛出一个javax.jms.ResourceAllocationException异常
+            <systemUsage sendFailIfNoSpace="true">
+            更好的解决方式如下，客户端会首先等待3000毫秒，然后再次尝试
+            如果此时broker依然没有足够的空间可用，才抛出异常
+        -->
+        <systemUsage>
+            <systemUsage>
+                <!-- 非持久化消息最大占用内存大小 -->
+                <memoryUsage>
+                    <memoryUsage percentOfJvmHeap="70"/>
+                </memoryUsage>
+                <!-- 持久化消息最大占用硬盘大小 -->
+                <storeUsage>
+                    <storeUsage limit="100 gb"/>
+                </storeUsage>
+                <!-- 临时消息最大占用硬盘大小 -->
+                <tempUsage>
+                    <tempUsage limit="50 gb"/>
+                </tempUsage>
+            </systemUsage>
+        </systemUsage>
+
+        <!--
+            传输器配置
+            http://activemq.apache.org/configuring-transports.html
+        -->
+        <transportConnectors>
+            <!--
+                ActiveMQ支持的传输协议 http://activemq.apache.org/configuring-transports.html
+                openwire:activemq自定义的一种协议 具体请阅读http://activemq.apache.org/openwire.html
+                amqp:即Advanced Message Queuing Protocol,一个提供统一消息服务的应用层标准高级消息队列协议,是应用层协议的
+                     一个开放标准,为面向消息的中间件设计。基于此协议的客户端与消息中间件可传递消息，并不受客户端/中间件不
+                     同产品，不同开发语言等条件的限制。
+                stomp:STOMP，Streaming Text Orientated Message Protocol，是流文本定向消息协议，是一种为MOM(Message
+                      Oriented Middleware，面向消息的中间件)设计的简单文本协议。
+                mqtt:MQTT（Message Queuing Telemetry Transport，消息队列遥测传输）是IBM开发的一个即时通讯协议，有可能成为
+                     物联网的重要组成部分。该协议支持所有平台，几乎可以把所有联网物品和外部连接起来，被用来当做传感器和致
+                     动器（比如通过Twitter让房屋联网）的通信协议。
+                另外它还支持tcp、udp、xmpp等协议，这里就不详细说明了，想知道更多请查看
+                http://activemq.apache.org/protocols.html
+
+                uri格式:scheme://ip:port?k1=v1&k2=v2 参考:http://activemq.apache.org/tcp-transport-reference.html
+
+                ActiveMQ支持的传输方式
+                ActiveMQ目前支持的transport有VM Transport、TCP Transport、SSL Transport、Peer Transport、UDP Transport、
+                Multicast Transport、HTTP and HTTPS Transport、Failover Transport、Fanout Transport、Discovery Transport
+                、ZeroConf Transport 等
+                部分说明>
+                VM transport: 允许在VM内部通信，从而避免了网络传输的开销。这时候采用的连接不是 socket 连接，而是直接地方
+                法调用。 第一个创建 VM 连接的客户会启动一个 embed VM broker，接下来所有使用相同的 broker name 的 VM 连接
+                都会使用这个 broker。当这个 broker 上所有的连接都关闭的时候，这个 broker也会自动关闭。
+                TCP transport: 允许客户端通过 TCP socket 连接到远程的 broker。
+                Failover Transport: 是一种重新连接的机制，它工作于其它 transport 的上层，用于建立可靠的传输。它的配置语法
+                允许制定任意多个复合的 URI。Failover transport 会自动选择其中的一个 URI 来尝试建立连接。如果没有成功，那
+                么会选择一个其它的 URI 来建立一个新的连接。
+                Discovery transport 是可靠的 tranport。它使用Discovery transport来定位用来连接的 URI 列表。
+
+            -->
+            <!-- DOS protection, limit concurrent connections to 1000 and frame size to 100MB -->
+            <transportConnector name="openwire"
+                                uri="tcp://0.0.0.0:61616?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600">
+            </transportConnector>
+            <transportConnector name="amqp"
+                                uri="amqp://0.0.0.0:5672?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="stomp"
+                                uri="stomp://0.0.0.0:61613?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="mqtt"
+                                uri="mqtt://0.0.0.0:1883?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="ws"
+                                uri="ws://0.0.0.0:61614?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+        </transportConnectors>
+
+        <!-- destroy the spring context on shutdown to stop jetty -->
+        <shutdownHooks>
+            <bean xmlns="http://www.springframework.org/schema/beans"
+                  class="org.apache.activemq.hooks.SpringContextHook"/>
+        </shutdownHooks>
+        <!-- 配置ActiveMQ 插件，具体可以参考Spring的bean配置 -->
+        <plugins>
+        </plugins>
+    </broker>
+
+    <!--
+        Enable web consoles, REST and Ajax APIs and demos
+        The web consoles requires by default login, you can disable this in the jetty.xml file
+
+        Take a look at ${ACTIVEMQ_HOME}/conf/jetty.xml for more details
+    -->
+    <import resource="jetty.xml"/>
+    <!--<import resource="activemq-jdbc.xml"/>-->
+</beans>
+        <!-- END SNIPPET: example -->

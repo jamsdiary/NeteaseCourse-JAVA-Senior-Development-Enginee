@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rolling-update-test
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rolling-update-test
+    spec:
+      containers:
+      - name: rolling-update-test
+        image: 192.168.100.249/study/hello-node:v2
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rolling-update-test
+  labels:
+    app: rolling-update-test
+  namespace: default
+spec:
+  ports:
+  - nodePort: 30321
+    port: 8080
+    protocol: TCP
+  selector:
+    app: rolling-update-test
+  type: LoadBalancer
+

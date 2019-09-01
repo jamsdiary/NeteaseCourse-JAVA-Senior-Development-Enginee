@@ -1,0 +1,15 @@
+# java class files
+*.class
+
+# generate files
+bin/
+gen/
+target/
+
+# gradle files
+.gradle/
+build/
+
+.gradle/
+
+*.log

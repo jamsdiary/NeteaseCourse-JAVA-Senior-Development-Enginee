@@ -1,0 +1,12 @@
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+discovery.zen.minimum_master_nodes: 1
+
+#设置HTTP开启状态
+http.enabled: true
+
+#设置运行跨域访问
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+http.max_content_length: 500mb
+

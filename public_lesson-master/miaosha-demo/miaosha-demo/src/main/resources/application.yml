@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring: 
+  datasource:
+    url: jdbc:mysql://database.tony.com:3306/public-lesson?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: tony
+    password: tony
+    driver-class-name: com.mysql.jdbc.Driver
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  mvc: 
+    static-path-pattern: /resources/**

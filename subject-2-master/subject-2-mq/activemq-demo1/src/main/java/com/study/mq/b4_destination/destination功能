@@ -1,0 +1,78 @@
+多目标 http://activemq.apache.org/composite-destinations.html
+启动创建目标 http://activemq.apache.org/configure-startup-destinations.html
+如果需要activemq启动时自动创建一些队列或主题，可以在activemq.xml的broker中增加配置
+<destinations>
+    <!-- 队列 -->
+    <queue physicalName="FOO.BAR"/>
+    <!-- 主题 -->
+    <topic physicalName="SOME.TOPIC"/>
+</destinations>
+
+
+目标自动删除 http://activemq.apache.org/delete-inactive-destinations.html
+ActiveMQ可以自动清楚非活动的目标，但默认没有开启，可以通过修改配置开启
+<broker xmlns="http://activemq.apache.org/schema/core" schedulePeriodForDestinationPurge="10000">
+  <destinationPolicy>
+     <policyMap>
+        <policyEntries>
+           <policyEntry queue=">" gcInactiveDestinations="true" inactiveTimoutBeforeGC="30000"/>
+        </policyEntries>
+     </policyMap>
+  </destinationPolicy>
+</broker>
+schedulePeriodForDestinationPurge：间隔多少毫秒检查一次
+gcInactiveDestinations：非活动队列清楚开关，为true时，inactiveTimoutBeforeGC才会生效
+inactiveTimoutBeforeGC：空队列超过多少毫秒处于非活动时被删除
+
+
+目标url扩展机制 http://activemq.apache.org/destination-options.html
+镜像队列 http://activemq.apache.org/mirrored-queues.html
+如果为queue1队列配置镜像队列后，ActiveMQ会生成一个VirtualTopic.Mirror.queue1的主题，并接收发送到queue1的所有消息，通过订阅此主题，可以使多个用户都到queue1发送的消息。
+在<broker>元素中配置：
+<destinationInterceptors>
+    <mirroredQueue copyMessage = "true" postfix=".qmirror" prefix=""/>
+</destinationInterceptors>
+这将为Broker上的每个队列创建一个名为“*.qmirror”的主题。
+
+
+为每个目标配置不同策略 http://activemq.apache.org/per-destination-policies.html
+ActiveMQ可以为不同的队列或主题配置不同的策略，通过<policyEntry>元素上的属性配置实现
+
+
+虚拟目标 http://activemq.apache.org/virtual-destinations.html
+ActiveMQ 使用持久订阅时，遵循了JMS规范，同一个clientId，只能有一个JMS连接处于活动状态，即只有一个线程可以从给定的主题消费。所以，使用持久订阅时会有两个问题：
+a. 一个应用无法启动多个实例，即应用无法实现高可用；
+b. 无法实现消息负载均衡。
+
+ActiveMQ 通过一个虚拟目标将queue和topic结合，使queue能收到topic的消息，来实现持久订阅的功能。
+ActiveMQ 可以通过配置，为消费者的队列自动创建虚拟一个主题作为虚拟目标，生产者发送消息到主题时，主题名符合虚拟目标的规则，会将消息自动转发到消费者队列中。
+
+使用方法：
+1、在activemq.xml的broker中增加以下配置
+<destinationInterceptors>
+    <virtualDestinationInterceptor>
+        <virtualDestinations>
+            <!--
+            name：主题名，可以是通配符
+            prefix：队列的前缀
+            selectorAware：表示从Topic中将消息转发给Queue时，是否关注Consumer的selector情况。如果为false，那么Topic中的消息全部转发给Queue，否则只会转发匹配Queue Consumer的selector的消息
+            -->
+            <virtualTopic name=">" prefix="VTC.*." selectorAware="false"/>
+        </virtualDestinations>
+    </virtualDestinationInterceptor>
+</destinationInterceptors>
+
+2、在消费者代码中，将创建topic改为创建queue；创建持久订阅消费者的方法改为创建非持久订阅消费者
+Destination destination = session.createQueue("VTC.c1.FOO.B");// c1相当于clientId，FOO.B为主题名。对FOO.B而言，c1相当于它的订阅者。broker将c1订阅的消息转发到VTC.c1.FOO.B队列中。而且，这个队列完全具有队列的所有特性，它的Consumer可以并行消费。
+consumer = session.createConsumer(destination);
+
+
+通配符 http://activemq.apache.org/wildcards.html
+ActiveMQ 的queue和topic名称支持通配符，通过通配符可以增强queue和topic的功能
+. 用于分隔名称
+* 用于匹配任何名称
+> 用于递归匹配从此名称开始的任何目标
+
+com.study.*.mq 匹配com.study.a.mq,不匹配com.study.a.b.mq
+com.>               com.study.a.mq和com.study.a.b.mq都匹配
+通配符可用于生产和消费者，在生产者中使用通配符时，消息将发送到所有匹配的目标上；在消费者中使用通配符时，将接收所有匹配的目标的消息。

@@ -1,0 +1,58 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /rabbitmq
+    
+logging:
+  level:
+    root: info
+    com:
+      study:
+        rabbitmq:
+          mapper: trace
+
+spring:
+  datasource:
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://47.106.202.10:3306/test?useSSL=false&characterEncoding=utf8
+    username: allen
+    password: allen
+    druid:
+      initial-size: 2     #初始化连接
+      max-active: 10       #最大连接
+      min-idle: 2         #最小空闲连接
+      max-wait: 1000      #超时等待时间以毫秒为单位 1000等于60秒
+      log-abandoned: true #连接被泄露时是否打印
+      pool-prepared-statements: true
+      #stat-view-servlet:
+      #  allow: true
+      #test-on-borrow: true
+      
+  application:
+    name: rabbitmq
+  rabbitmq:
+    host: 47.106.202.10
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    # p端收到回调，确认消息发送结果
+    publisher-confirms: true
+    publisher-returns: true
+    template:
+      mandatory: true    
+
+# mybatis
+mybatis:
+  type-aliases-package: com.study.rabbitmq.model
+  mapper-locations: classpath:com/study/rabbitmq/mapper/*.xml
+  
+# pagehelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+  

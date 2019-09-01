@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.mycat.mapper.EmployeeMapper">
+	<resultMap type="com.study.mycat.model.Employee" id="baseResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="name" column="name" jdbcType="VARCHAR"/>
+		<result property="shardingId" column="sharding_id" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<select id="selectByExample" parameterType="com.study.mycat.model.Employee" resultMap="baseResultMap">
+		select * from employee 
+		<where>
+			<if test="name != null and name != ''">
+				name like CONCAT(CONCAT('%',#{name},'%'))
+			</if>
+			<if test="shardingId != null and shardingId != ''">
+				and sharding_id = #{shardingId}
+			</if>
+		</where>
+		ORDER BY id
+	</select>
+	
+	<select id="selectByPrimaryKey" resultMap="baseResultMap">
+		select * from employee where id = #{id}
+	</select>
+	
+	<delete id="deleteByPrimaryKey">
+		delete from employee where id = #{id}
+	</delete>
+	
+	<update id="updateByPrimaryKey" parameterType="com.study.mycat.model.Employee">
+		update employee 
+		<set>
+			<if test="name != null and name != ''">
+				name=#{name},
+			</if>
+			<if test="isNew != 'N'.toString() ">
+				sharding_id=#{shardingId},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="com.study.mycat.model.Employee">
+		insert into employee (id, name, sharding_id) value (#{id}, #{name}, #{shardingId})
+	</insert>
+</mapper>

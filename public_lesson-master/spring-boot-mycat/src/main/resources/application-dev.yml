@@ -1,0 +1,40 @@
+# 开启debug日志
+#debug: true
+logging:
+  level:
+    root: warn
+    com:
+      study:
+        mycat:
+          mapper: trace
+spring:
+  redis:
+    database: 0
+    host: redis.dn.com
+    password: redis123456
+    timeout: 5000
+    port: 6379
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1
+        min-idle: 0
+#    sentinel:
+#      master: master
+#      nodes: redis.dn.com:26379,redis.dn.com:36379,redis.dn.com:46379
+  datasource:
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:8066/test
+    username: root
+    password: root
+    druid:
+      initial-size: 1
+      max-active: 20
+      min-idle: 1
+      stat-view-servlet:
+        allow: true
+      test-on-borrow: true
+    

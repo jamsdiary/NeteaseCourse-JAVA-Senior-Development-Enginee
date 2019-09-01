@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.mapper.UserMapper">
+	<resultMap type="User" id="resultListUser">
+		<id column="id" property="id" />
+		<result column="userName" property="userName" />
+		<result column="userAge" property="userAge" />
+		<result column="userAddress" property="userAddress" />
+	</resultMap>
+
+	<!-- 借助数组进行分页 -->
+	<select id="selectUsersByArray" resultMap="resultListUser">
+		select * from user
+	</select>
+	<!-- 借助Sql语句进行分页 -->
+	<select id="selectUsersBySql" parameterType="map" resultMap="resultListUser">
+		select * from user limit #{pageNo} , #{pageSize}
+	</select>
+	<!-- RowBounds实现分页 -->
+	<select id="selectUsersByRowBounds" resultMap="resultListUser">
+		select * from user 
+	</select>
+	<!-- 插件分页 -->
+	<select id="selectUsersByPage" parameterType="map" resultMap="resultListUser">
+		select * from user 
+	</select>
+	<!-- 插入数据 -->
+	<insert id="user_insert" parameterType="User">
+		INSERT INTO user(userName,userAge,userAddress) VALUE (#{userName}, #{userAge}, #{userAddress});
+	</insert>
+	<!-- 删除 -->
+	<delete id="user_delete" parameterType="User">
+		DELETE FROM user WHERE userName=#{userName}
+	</delete>
+	
+	<select id="getPerson" resultType="com.study.entity.Person">
+        select * from person
+    </select>
+    <insert id="insertPerson">
+        INSERT INTO person(interest) VALUES (#{interest,typeHandler=com.study.handler.MyListTypeHandler})
+    </insert>
+	
+</mapper>

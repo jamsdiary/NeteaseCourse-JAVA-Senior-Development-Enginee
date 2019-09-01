@@ -1,0 +1,20 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /mycat
+logging:
+  level:
+    root: info
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    druid:
+      initial-size: 1
+      max-active: 20
+      min-idle: 1
+      stat-view-servlet:
+        allow: true
+      test-on-borrow: true
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: root

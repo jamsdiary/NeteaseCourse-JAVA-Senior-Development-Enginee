@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.mybatis.mapper.UserMapper">
+	<!-- 为了返回List，类型而定义的resultMap -->
+	<resultMap type="User" id="resultListUser">
+		<id column="id" property="id" />
+		<result column="userName" property="userName" />
+		<result column="userAge" property="userAge" />
+		<result column="userAddress" property="userAddress" />
+	</resultMap>
+
+	<!-- 借助数组进行分页 -->
+	<select id="selectUsersByArray" resultMap="resultListUser">
+		select * from user
+	</select>
+	<!-- 借助Sql语句进行分页 -->
+	<select id="selectUsersBySql" parameterType="map" resultMap="resultListUser">
+		select * from user limit #{pageNo} , #{pageSize}
+	</select>
+	<!-- RowBounds实现分页 -->
+	<select id="selectUsersByRowBounds" resultMap="resultListUser">
+		select * from user 
+	</select>
+	<!-- 插件分页 -->
+	<select id="selectUsersByPage" parameterType="map" resultMap="resultListUser">
+		select * from user 
+	</select>
+	
+</mapper>

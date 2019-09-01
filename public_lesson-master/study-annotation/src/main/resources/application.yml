@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:  
+    datasource:  
+        name: db  
+        type: com.alibaba.druid.pool.DruidDataSource  
+        url: jdbc:mysql://mysql.dn.com:3306/mybatis?useUnicode=true&characterEncoding=utf-8
+        username: root  
+        password: root
+        driver-class-name: com.mysql.jdbc.Driver  
+        minIdle: 5  
+        maxActive: 100  
+        initialSize: 10  
+        maxWait: 60000  
+        timeBetweenEvictionRunsMillis: 60000  
+        minEvictableIdleTimeMillis: 300000  
+        validationQuery: select 'x'  
+        testWhileIdle: true  
+        testOnBorrow: false  
+        testOnReturn: false  
+        poolPreparedStatements: true  
+        maxPoolPreparedStatementPerConnectionSize: 50  
+        removeAbandoned: true  
+        filters: stat  
+        cachePrepStmts: true  # 开启二级缓存  
+
+mybatis:
+    configuration:
+        mapUnderscoreToCamelCase: true
+        cache-enabled: true
+        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    mapper-locations: classpath:com/study/annotation/mapper/*.xml
+    
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params-count: countSql

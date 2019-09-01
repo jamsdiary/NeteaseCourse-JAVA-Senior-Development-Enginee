@@ -1,0 +1,20 @@
+logging:
+    level:
+#        tk.mybatis: DEBUG
+        com.study.security: DEBUG
+server:
+    port: 9992
+
+spring:
+    profiles:
+      active: dev
+    application:
+        name: cloud-tool
+    rabbitmq:
+      host: ${RABBIT_MQ_HOST:localhost}
+      port:  ${RABBIT_MQ_PORT:5672}
+      username: guest
+      password: guest
+    sleuth:
+        sampler:
+            percentage: 1

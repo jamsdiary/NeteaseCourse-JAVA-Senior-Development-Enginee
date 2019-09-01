@@ -1,0 +1,14 @@
+在CentOS7环境中安装好RocketMQ后，为了保证网络互通，你可以关掉防火墙
+
+生产者启动后，发送消息时会报以下错：
+Exception in thread "main" org.apache.rocketmq.client.exception.MQClientException: No route info of this topic, TopicTest
+
+原因：
+使用RocketMQ进行发消息时，必须要指定topic，对于topic的设置有一个开关autoCreateTopicEnable，一般在开发测试环境中会使用默认设置autoCreateTopicEnable = true，
+但是这样就会导致topic的设置不容易规范管理，没有统一的审核等等，所以在正式环境中会在Broker启动时设置参数autoCreateTopicEnable = false。
+
+但是，目前的版本中，autoCreateTopicEnable设置为true也不会生效
+
+解决方法：
+手动通过命令或管理界面创建主题
+/usr/rocketmq/bin/mqadmin updateTopic -n '192.168.100.242:9876' -c DefaultCluster -t TopicTest

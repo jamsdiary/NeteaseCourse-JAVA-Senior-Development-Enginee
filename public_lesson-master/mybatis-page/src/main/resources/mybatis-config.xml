@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<typeAliases>
+		<typeAlias alias="PageInfo" type="com.study.mybatis.utils.PageInfo" />
+	</typeAliases>
+	
+	<plugins>
+		<!-- 
+		<plugin interceptor="com.studytis.plugin.PagePlugin2" />
+		-->
+		
+		<plugin interceptor="com.study.mybatis.plugin.StudyPagePlugin">
+			<property name="dialect" value="mysql" />
+			<property name="pageSqlId" value=".*ByPage$" />
+		</plugin>
+	</plugins>
+
+</configuration>

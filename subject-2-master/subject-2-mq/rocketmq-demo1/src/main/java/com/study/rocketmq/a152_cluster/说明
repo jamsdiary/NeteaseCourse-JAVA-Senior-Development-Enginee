@@ -1,0 +1,13 @@
+1、集群环境建好后，需要将各节点的端口添加到防火墙
+firewall-cmd --zone=public --add-port=9876/tcp --permanent
+firewall-cmd --zone=public --add-port=10909/tcp --permanent
+firewall-cmd --zone=public --add-port=10911/tcp --permanent
+firewall-cmd --zone=public --add-port=10912/tcp --permanent
+firewall-cmd --zone=public --add-port=10919/tcp --permanent
+firewall-cmd --zone=public --add-port=10921/tcp --permanent
+firewall-cmd --zone=public --add-port=10922/tcp --permanent
+firewall-cmd --reload
+
+2、启动rocketmq-console程序，查看集群状态
+
+3、运行ClusterConsumer和ClusterProducer

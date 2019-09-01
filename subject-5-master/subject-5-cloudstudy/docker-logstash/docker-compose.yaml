@@ -1,0 +1,51 @@
+version: '3.6'
+services: 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
+    ports:
+      - 9300:9300
+      - 9200:9200
+    environment:
+      #- transport.host=127.0.0.1
+      - cluster.name=docker-cluster
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - logstash_network
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.4.0
+    ports:
+      - 5601:5601
+    networks:
+      - logstash_network
+    depends_on: 
+      - elasticsearch
+  logstash:
+    image: xiaochunping/logstash-input-jdbc-mysql:6.4.0
+    environment:
+      - LOGSTASH_JDBC_URL=jdbc:mysql://192.168.100.240:3306/cloud_classroom?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      - LOGSTASH_JDBC_DRIVER=com.mysql.jdbc.Driver
+      - LOGSTASH_JDBC_DRIVER_JAR_LOCATION=mysql-connector-java.jar
+      - LOGSTASH_JDBC_USERNAME=root
+      - LOGSTASH_JDBC_PASSWORD=root
+    ports: 
+      - 9600:9600
+      - 5044:5044
+    networks:
+      - logstash_network
+    volumes: 
+      #单个文件挂载
+      - ./pipeline/logstash-input-jdbc.conf:/usr/share/logstash/pipeline/logstash.conf
+      #- ./pipeline/jdbc-course.sql:/usr/share/logstash/pipeline/jdbc-course.sql
+      #目录挂载
+      #- ./pipeline/:/usr/share/logstash/pipeline/
+    depends_on: 
+      - elasticsearch
+      - kibana
+volumes:
+  elasticsearch_data:
+networks:
+  logstash_network:

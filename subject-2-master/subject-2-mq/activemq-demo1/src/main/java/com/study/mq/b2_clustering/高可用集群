@@ -1,0 +1,7 @@
+http://activemq.apache.org/clustering.html
+1、 基于jdbc
+2、 基于kahaDB
+3、 http://activemq.apache.org/replicated-message-store.html
+http://activemq.apache.org/pure-master-slave.html
+http://activemq.apache.org/networks-of-brokers.html
+

@@ -1,0 +1,5 @@
+1、 STOMP是简单（或流式）文本定向消息传递协议
+建立在websocket连接之上
+
+
+2、  纯websocket

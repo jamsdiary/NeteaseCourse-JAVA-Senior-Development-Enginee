@@ -1,0 +1,23 @@
+
+spring:
+  main: 
+    allow-bean-definition-overriding: true
+
+dubbo:
+  application:
+    name: service-app1
+  registry:
+    address: zookeeper://127.0.0.1:2181
+  protocol:
+    #name: memcached
+    #name: http
+    #server: tomcat
+    #server: servlet
+    #name: hessian
+    #server: tomcat
+    #name: rmi
+    name: dubbo
+    #port: 8080
+    port: 20880
+  scan: 
+    base-packages: com.study.mike.dubbo.provider

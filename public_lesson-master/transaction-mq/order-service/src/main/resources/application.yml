@@ -1,0 +1,19 @@
+server:
+  port: 8081
+
+spring: 
+  datasource: 
+    url: jdbc:mysql://database.tony.com:3306/test-order-db?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: tony
+    password: tony
+    driver-class-name: com.mysql.jdbc.Driver
+  rabbitmq:
+    host: mq.tony.com
+    port: 5672
+    username: admin
+    password: 12345678
+    # 重要！  开启消息发送确认机制
+    publisher-confirms: true
+logging:
+  level:
+    root: warn

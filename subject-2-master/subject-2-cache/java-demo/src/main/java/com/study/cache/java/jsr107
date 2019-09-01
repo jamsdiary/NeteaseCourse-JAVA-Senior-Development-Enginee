@@ -1,0 +1,17 @@
+了解一下就行，因为~没太多的应用
+http://jcp.org/en/jsr/detail?id=107
+1. 目标
+为应用程序提供缓存Java对象的功能。
+定义了一套通用的缓存概念和工具。
+最小化开发人员使用缓存的学习成本。
+最大化应用程序在使用不同缓存实现之间的可移植性。
+支持进程内和分布式的缓存实现。
+
+2. 核心概念
+Java Caching定义了5个核心接口，分别是CachingProvider, CacheManager, Cache, Entry 和 Expiry。
+CachingProvider定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可以在运行期访问多个CachingProvider。
+CacheManager定义了创建、配置、获取、管理和控制多个唯一命名的Cache，这些Cache存在于CacheManager的上下文中。一个CacheManager仅被一个CachingProvider所拥有。
+Cache是一个类似Map的数据结构并临时存储以Key为索引的值。一个Cache仅被一个CacheManager所拥有。
+Entry是一个存储在Cache中的key-value对。
+每一个存储在Cache中的条目有一个定义的有效期，即Expiry Duration。
+一旦超过这个时间，条目为过期的状态。一旦过期，条目将不可访问、更新和删除。缓存有效期可以通过ExpiryPolicy设置。

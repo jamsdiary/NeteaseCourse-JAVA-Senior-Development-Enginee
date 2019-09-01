@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>前后端分离示例</title>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+jQuery.support.cors = true;// 开启ajax跨支持，封装跨域调用的代码
+    $(function(){
+        //获取token
+        $("#getToken").click(function(){
+            $.ajax({
+				type: "POST",
+				url: "http://www.tony.com:8081/user/getToken?userName=tony&passWord=123" ,
+				contentType: "application/json; charset=utf-8",
+				complete: function(XMLHttpRequest, textStatus) { 
+					// 将token贴到html
+					$("#token").html(XMLHttpRequest.responseText.toString());
+				}
+            });
+         });
+		 
+		 // 调用后台接口
+        $("#getDatas").click(function(){
+            var token = $("#token").html();
+            //Ajax调用处理
+            $.ajax({
+				type: "GET",
+				url: "http://www.tony.com:8081/user/listData",
+				dataType: "json",  
+				// 头部设置token
+				headers: {
+					"jwt-token": token
+				},
+				complete: function(XMLHttpRequest, textStatus) {
+					// 贴到html页面
+					$("#result").html(XMLHttpRequest.responseText.toString());
+				}
+            });
+         });
+    });
+</script>
+</head>
+<body>
+
+	<button id="getToken" type="button">获取用户tony的token</button>
+	<br /> Token结果:
+	<span id="token"></span>
+	<br />
+	<br />
+	<br />
+	<button id="getDatas" type="button">调用数据接口</button>
+	<br /> 数据请求调用结果:
+	<span id="result"></span>
+</body>
+</html>

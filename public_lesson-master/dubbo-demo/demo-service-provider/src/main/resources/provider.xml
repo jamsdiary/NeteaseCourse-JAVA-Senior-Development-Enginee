@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans.xsd        http://code.alibabatech.com/schema/dubbo        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- 通过spring实例化DemoServiceImpl -->
+	<bean id="demoService" class="com.study.dubbo.DemoServiceImpl" />
+
+	<!-- 系统名称 -->
+	<dubbo:application name="demo-service-provider" />
+
+	<!-- 使用zookeeper保存服务提供者自己的具体信息 -->
+	<dubbo:registry address="zookeeper://localhost:2181"
+		client="zkclient" />
+
+	<!-- dubbo通过20880端口提供服务，请求的body数据通过fastjson的格式进行传输 -->
+	<dubbo:protocol name="dubbo" port="28080"
+		serialization="fastjson" />
+
+	<!-- 声明需要暴露的服务接口 -->
+	<dubbo:service interface="com.study.dubbo.DemoService"
+		ref="demoService" />
+
+</beans>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.order.mapper.LessonScheduleMapper" >
+  <resultMap id="BaseResultMap" type="com.study.order.bean.LessonSchedule" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="course_id" property="courseId" jdbcType="VARCHAR" />
+    <result column="lesson_period_type" property="lessonPeriodType" jdbcType="INTEGER" />
+    <result column="lesson_resource" property="lessonResource" jdbcType="VARCHAR" />
+    <result column="lesson_time" property="lessonTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, course_id, lesson_period_type, lesson_resource, lesson_time
+  </sql>
+
+
+  <select id="getAllLessonSchedule" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from lesson_schedule
+  </select>
+
+  <select id="getLessonSchedulesByPage" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM lesson_schedule WHERE name like concat('%',#{key},'%')
+    <if test="start!=null and size!=null">
+      order by id limit #{start},#{size}
+    </if>
+  </select>
+
+  <select id="getCountByKey" resultType="Long">
+    SELECT  count(*)  FROM lesson_schedule WHERE name like concat('%',#{key},'%');
+  </select>
+
+  <select id="getLessonSchedulesByCourseId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from lesson_schedule
+    where course_id = #{courseId,jdbcType=VARCHAR}
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from lesson_schedule
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from lesson_schedule
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.study.order.bean.LessonSchedule" >
+    <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String">
+      select UUID()
+    </selectKey>
+    insert into lesson_schedule (id, name, course_id,
+    lesson_period_type, lesson_resource, lesson_time
+    )
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{courseId,jdbcType=VARCHAR},
+    #{lessonPeriodType,jdbcType=INTEGER}, #{lessonResource,jdbcType=VARCHAR}, #{lessonTime,jdbcType=TIMESTAMP}
+    )
+  </insert>
+  <insert id="insertSelective" parameterType="com.study.order.bean.LessonSchedule" >
+    insert into lesson_schedule
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="courseId != null" >
+        course_id,
+      </if>
+      <if test="lessonPeriodType != null" >
+        lesson_period_type,
+      </if>
+      <if test="lessonResource != null" >
+        lesson_resource,
+      </if>
+      <if test="lessonTime != null" >
+        lesson_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="courseId != null" >
+        #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonPeriodType != null" >
+        #{lessonPeriodType,jdbcType=INTEGER},
+      </if>
+      <if test="lessonResource != null" >
+        #{lessonResource,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonTime != null" >
+        #{lessonTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.study.order.bean.LessonSchedule" >
+    update lesson_schedule
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="courseId != null" >
+        course_id = #{courseId,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonPeriodType != null" >
+        lesson_period_type = #{lessonPeriodType,jdbcType=INTEGER},
+      </if>
+      <if test="lessonResource != null" >
+        lesson_resource = #{lessonResource,jdbcType=VARCHAR},
+      </if>
+      <if test="lessonTime != null" >
+        lesson_time = #{lessonTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.study.order.bean.LessonSchedule" >
+    update lesson_schedule
+    set name = #{name,jdbcType=VARCHAR},
+      course_id = #{courseId,jdbcType=VARCHAR},
+      lesson_period_type = #{lessonPeriodType,jdbcType=INTEGER},
+      lesson_resource = #{lessonResource,jdbcType=VARCHAR},
+      lesson_time = #{lessonTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

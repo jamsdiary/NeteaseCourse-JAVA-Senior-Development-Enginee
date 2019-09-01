@@ -1,0 +1,30 @@
+server:
+  port: 8081
+spring:
+  freemarker:
+    cache: false
+    request-context-attribute: request
+    settings:
+      number_format: 0.##
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .ftl
+  # 指定当前环境
+  profiles:
+    active: dev
+ 
+# mybatis
+mybatis:
+  type-aliases-package: com.study.mycat.model
+  mapper-locations: classpath:mapper/*.xml
+  
+# pagehelper分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+  
+  

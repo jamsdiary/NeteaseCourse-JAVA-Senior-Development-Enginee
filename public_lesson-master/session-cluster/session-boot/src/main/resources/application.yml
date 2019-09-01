@@ -1,0 +1,4 @@
+server:
+  servlet:
+    context-path: /session-boot
+  port: 8080

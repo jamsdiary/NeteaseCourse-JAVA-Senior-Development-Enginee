@@ -1,0 +1,46 @@
+
+<!-- saved from url=(0022)http://127.0.0.1:8080/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Web Socket Test</title></head>
+<body>
+<script type="text/javascript">
+var socket;
+if (!window.WebSocket) {
+  window.WebSocket = window.MozWebSocket;
+}
+if (window.WebSocket) {
+  // 随机数
+  var random = Math.floor(Math.random()*(10000 - 10 +1) + 10)
+  socket = new WebSocket("ws://127.0.0.1:9001/websocket?userId=" + random);
+  socket.onmessage = function(event) {
+    var ta = document.getElementById('responseText');
+    ta.value = ta.value + '\n' + event.data
+  };
+  socket.onopen = function(event) {
+    var ta = document.getElementById('responseText');
+    ta.value = "Web Socket opened!";
+  };
+  socket.onclose = function(event) {
+    var ta = document.getElementById('responseText');
+    ta.value = ta.value + "Web Socket closed"; 
+  };
+} else {
+  alert("Your browser does not support Web Socket.");
+}
+
+function send(message) {
+  if (!window.WebSocket) { return; }
+  if (socket.readyState == WebSocket.OPEN) {
+    socket.send(message);
+  } else {
+    alert("The socket is not open.");
+  }
+}
+</script>
+<form onsubmit="return false;">
+<input type="text" name="message" value="Hello, World!"><input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)">
+<h3>Output</h3>
+<textarea id="responseText" style="width:500px;height:300px;"></textarea>
+</form>
+
+
+</body></html>

@@ -1,0 +1,4 @@
+BroadcastConsumer 需要最少启动两个才能更好的看到效果
+
+MessageModel.BROADCASTING 广播消费模式，所有订阅了同一个主题的消费者都会收到相同的消息
+MessageModel.CLUSTERING   集群消费模式，此集群不是指集群环境中的集群，但概念相同，即可实现消息的负载均衡。当有多个消费者订阅了相同的主题时，同一条消息只会有一个消费者消费

@@ -1,0 +1,10 @@
+异步分发 http://activemq.apache.org/consumer-dispatch-async.html
+独占消费 http://activemq.apache.org/exclusive-consumer.html
+优先级消费 http://activemq.apache.org/consumer-priority.html
+持久订阅者 http://activemq.apache.org/manage-durable-subscribers.html
+消费分组 http://activemq.apache.org/message-groups.html
+消息重发 http://activemq.apache.org/redelivery-policy.html
+消息追溯 http://activemq.apache.org/retroactive-consumer.html
+消息过滤 http://activemq.apache.org/selectors.html
+慢消费者处理 http://activemq.apache.org/slow-consumer-handling.html
+订阅恢复策略 http://activemq.apache.org/subscription-recovery-policy.html

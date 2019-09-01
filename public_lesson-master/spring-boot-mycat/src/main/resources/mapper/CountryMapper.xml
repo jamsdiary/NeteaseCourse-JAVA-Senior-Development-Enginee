@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.study.mycat.mapper.CountryMapper">
+	<resultMap type="com.study.mycat.model.Country" id="baseResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="countryname" column="countryname" jdbcType="VARCHAR"/>
+		<result property="countrycode" column="countrycode" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<select id="selectByExample" parameterType="com.study.mycat.model.Country" resultMap="baseResultMap">
+		select * from country 
+		<where>
+			<if test="countryname != null and countryname != ''">
+				countryname like CONCAT(CONCAT('%',#{countryname},'%'))
+			</if>
+			<if test="countrycode != null and countrycode != ''">
+				and countrycode like CONCAT(CONCAT('%',#{countrycode},'%'))
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByPrimaryKey" resultMap="baseResultMap">
+		select * from country where id = #{id}
+	</select>
+	
+	<delete id="deleteByPrimaryKey">
+		delete from country where id = #{id}
+	</delete>
+	
+	<update id="updateByPrimaryKey" parameterType="com.study.mycat.model.Country">
+		update country set countryname=#{countryname}, countrycode=#{countrycode} where id=#{id}
+	</update>
+	
+	<insert id="insert" parameterType="com.study.mycat.model.Country">
+		insert into country (countryname, countrycode) value (#{countryname}, #{countrycode})
+	</insert>
+</mapper>

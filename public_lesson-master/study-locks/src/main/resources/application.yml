@@ -1,0 +1,20 @@
+spring:
+  redis:
+    host: localhost
+    #password: redis123456
+    port: 6379
+    timeout: 5000
+    jedis:
+      pool:
+        max-idle: 8
+        min-idle: 0
+        max-active: 8
+        max-wait: 1
+
+#    cluster:
+#      nodes:
+#      -
+#    sentinel:
+#      master:
+#      nodes:
+#      -

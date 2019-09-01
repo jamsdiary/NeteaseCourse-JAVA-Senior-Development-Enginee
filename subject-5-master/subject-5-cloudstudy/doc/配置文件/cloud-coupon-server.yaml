@@ -1,0 +1,41 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: cloud-coupon-server
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    joda-date-time-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non-null
+  datasource:
+    url: jdbc:mysql://192.168.100.240:3306/course_coupon?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+  redis:
+    pool:
+      maxIdle: 100
+      maxWait: 1000 
+    host: 192.168.100.241
+    port: 6379
+    password: redis123456
+    timeout: 2000
+    
+mybatis:
+  type-aliases-package: com.study.coupon.bean
+  mapper-locations: "classpath*:mapper/*Mapper.xml"
+#    static-path-pattern: /resources/**
+
+# 配置需要拦截，做权限验证的地址
+auth:
+  client:
+    include-path-patterns:
+      - "/coupon/op/**"
+      - "/coupon/detail/**"
+    id: cloud-coupon-server
+    secret: 123456
+    token-header: x-client-token
+  user:
+    token-header: Authorization
+  serviceId: cloud-auth

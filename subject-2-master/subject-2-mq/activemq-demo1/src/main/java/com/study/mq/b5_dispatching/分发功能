@@ -1,0 +1,38 @@
+异步发送 http://activemq.apache.org/async-sends.html
+broker消息分发策略 http://activemq.apache.org/dispatch-policies.html
+
+
+消息游标机制 http://activemq.apache.org/message-cursors.html
+https://www.cnblogs.com/JPAORM/archive/2012/05/19/2509769.html
+在ActiveMQ 5.0之前，broker会把正在传输的消息保存在内存中。使用这种内存模型,当一个消费者消费消息的速度跟不上生产者生产消息的速度的时候,会是broker内存中维护的正在传输的消息数量迅速增长,最终到达最大限额。
+当到达此最大限额后,broker就不能接受来自客户端的消息,这样生产者就会被阻塞直到broker的内存中有保存消息的空间为止。
+从 5.0 版本开始,ActiveMQ 实现了一种新的内存模型以防止慢速的消费者阻塞运行速度更快的生产者。这种内存模型使用了消息游标。
+
+
+消息消费确认优化 http://activemq.apache.org/optimized-acknowledgement.html
+由于5.4.2对批处理优化的应答有一个默认超时，这确保了ack及时，即使用户很慢。
+在慢速网络中，超时可能在达到批处理限制之前过期，因此会绕过利用率降低的带宽。
+在5.6版本中，超时可以通过 optimizeAcknowledgeTimeOut 属性进行配置。通过连接的URI字符串或在连接工厂上设置超时时间。默认值是300ms，如果值为0则禁用。
+需要设置optimizeAcknowledge为true，optimizeAcknowledgeTimeOut才会生效
+
+
+生产者流量控制 http://activemq.apache.org/producer-flow-control.html
+https://blog.csdn.net/neareast/article/details/7581855
+在ActiveMQ5.0版本中，可以对生产者连接进行流量控制，当broker检测到目标超出限额时，生产者将会被阻塞直至资源可永久。
+
+
+有序消息 http://activemq.apache.org/total-ordering.html
+通常，broker将保证同一生产者发送的所有消息的顺序。但是，由于broker使用多个线程处理，所以来自不同生产者的消息可能以不同的顺序到达不同的消费者。最后导致消息消费的顺序和发送的顺序不一致
+ActiveMQ 支持严格顺序消息，启用严格顺序后，消息将按生产者发送是的顺序发送给消费者，但这会严重影响性能。
+通过在activemq.xml中配置开启严格顺序
+<destinationPolicy>
+  <policyMap>
+    <policyEntries>
+      <policyEntry topic=">">
+        <dispatchPolicy>
+          <strictOrderDispatchPolicy/>
+        </dispatchPolicy>
+      </policyEntry>
+    </policyEntries>
+  </policyMap>
+</destinationPolicy

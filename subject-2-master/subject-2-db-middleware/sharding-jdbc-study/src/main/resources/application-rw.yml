@@ -1,0 +1,41 @@
+
+sharding:
+  jdbc:
+    datasource:
+      names: ds0,ds1
+      ds0: 
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.120.218:3306/orders?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+        username: mike
+        password: Mike666!
+        maxPoolSize: 50
+        minPoolSize: 1
+      ds1: 
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.120.219:3306/orders?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+        username: mike
+        password: Mike666!
+        maxPoolSize: 50
+        minPoolSize: 1
+    config:
+      sharding:
+        default-data-source-name: ds0
+      masterslave:
+        name: ms
+        master-data-source-name: ds0
+        slave-data-source-names: ds1
+      props:
+        sql.show: true
+        
+        
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+        
+        
+ 
+      
+

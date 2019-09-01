@@ -1,0 +1,7 @@
+消息属性 http://activemq.apache.org/activemq-message-properties.html
+activemq内部消息 http://activemq.apache.org/advisory-message.html
+大文件大对象 http://activemq.apache.org/blob-messages.html
+延时消息 http://activemq.apache.org/delay-and-schedule-message-delivery.html
+发送java对象 http://activemq.apache.org/message-transformation.html
+                                                                     http://activemq.apache.org/objectmessage.html
+发送java集合 http://activemq.apache.org/structured-message-properties-and-mapmessages.html
